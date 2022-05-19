@@ -19,7 +19,7 @@ contract Voter is Ownable {
 
     mapping(string => bool) voters;
     Candidate[] public candidates;
-    State state = State.OPEN;
+    State public state = State.OPEN;
     Candidate public victor;
 
     modifier mustHaveCitizenship(string memory citizenNumber) {
@@ -89,6 +89,7 @@ contract Voter is Ownable {
         }
 
         victor = candidates[id];
+        
         emit WinnerCalculated(candidates[id]);
     }
 
