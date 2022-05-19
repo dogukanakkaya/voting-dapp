@@ -20,10 +20,17 @@ contract Voter is Ownable {
     mapping(string => bool) voters;
     Candidate[] public candidates;
     State state = State.OPEN;
+    Candidate public victor;
 
     modifier mustHaveCitizenship(string memory citizenNumber) {
         require(verifyCitizenNumber(citizenNumber) == true, "You don't have a citizenship.");
         _;
+    }
+
+    function openVoting() public onlyOwner {
+        require(state == State.CLOSED);
+        
+        state = State.OPEN;
     }
 
     function startVoting() public onlyOwner {
@@ -36,6 +43,8 @@ contract Voter is Ownable {
         require(state == State.VOTING);
         
         state = State.CLOSED;
+
+        calculateWinner();
     }
 
     function registerCandidate(
@@ -68,11 +77,10 @@ contract Voter is Ownable {
         emit Voted(firstName, lastName);
     }
 
-    function calculateWinner() public onlyOwner {
-        require(state == State.CLOSED);
-
+    function calculateWinner() private {
         uint256 maxVotes = 0;
         uint id;
+        
         for (uint i; i < candidates.length; i++) {
             if (candidates[i].votes > maxVotes) {
                 maxVotes = candidates[i].votes;
@@ -80,6 +88,7 @@ contract Voter is Ownable {
             }
         }
 
+        victor = candidates[id];
         emit WinnerCalculated(candidates[id]);
     }
 
